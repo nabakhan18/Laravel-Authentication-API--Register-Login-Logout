@@ -2,48 +2,35 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use Tymon\JWTAuth\Contracts\JWTSubject;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    //     'ref_id',
-    //     'full_name', // Changed from 'name'
-    //     'email',
-    //     'password',
-    //     'is_active',
-    // ];
+    protected $table = 'users';
+
+    protected $connection = 'namazinislam';
+
     protected $fillable = [
-        'full_name',
-        'email',
         'ref_id',
+        'name',
+        'email',
         'password',
-        // 'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        // 'full_name',
-        // 'password',
-        // 'ref_id',
         'password',
-        // 'is_active',
+        'remember_token',
     ];
 
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
     /**
      * Get the attributes that should be cast.
      *
