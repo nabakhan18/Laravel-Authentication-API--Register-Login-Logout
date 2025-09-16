@@ -18,6 +18,7 @@ class AuthController extends Controller
     // Register
     public function register(Request $request)
     {
+
         // Manually trim and sanitize email
         $request->merge([
             'email' => trim($request->email),
@@ -64,55 +65,59 @@ class AuthController extends Controller
             'message' => 'User registered successfully.',
             'user' => $user,
         ], 201);
+
+        if ($user) {
+            return redirect()->route('dashboard'); // agar dashboard ka route bana hua hai
+        }
     }
 
 
 
     // Login
-   public function login(Request $request)
-{
-    $credentials = $request->only('email', 'password');
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
 
-    // Validate input
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|string|min:8',
-    ]);
+        // Validate input
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ]);
 
-    // Check if user exists
-    $user = \App\Models\User::where('email', $credentials['email'])->first();
-    if (!$user) {
-        return back()->withErrors(['email' => '❌ User not found']);
+        // Check if user exists
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        if (!$user) {
+            return back()->withErrors(['email' => '❌ User not found']);
+        }
+
+        // Verify password
+        if (!\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+            return back()->withErrors(['password' => '❌ Incorrect password']);
+        }
+
+        // Generate JWT token
+        if (!$token = \Tymon\JWTAuth\Facades\JWTAuth::attempt($credentials)) {
+            return back()->withErrors(['email' => '❌ Could not create token']);
+        }
+
+        // ✅ Store token in session so we can use it later
+        session(['jwt_token' => $token]);
+
+        // Redirect to dashboard with success message
+        return redirect()->route('dashboard')->with('success', '✅ Login successful!');
     }
-
-    // Verify password
-    if (!\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
-        return back()->withErrors(['password' => '❌ Incorrect password']);
-    }
-
-    // Generate JWT token
-    if (!$token = \Tymon\JWTAuth\Facades\JWTAuth::attempt($credentials)) {
-        return back()->withErrors(['email' => '❌ Could not create token']);
-    }
-
-    // ✅ Store token in session so we can use it later
-    session(['jwt_token' => $token]);
-
-    // Redirect to dashboard with success message
-    return redirect()->route('dashboard')->with('success', '✅ Login successful!');
-}
 
 
 
     public function logout()
-{
-    try {
-        JWTAuth::invalidate(JWTAuth::getToken()); // 🔑 this kills the token
-        return response()->json(['message' => 'Successfully logged out']);
-    } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-        return response()->json(['message' => 'Token is invalid or already expired'], 401);
+    {
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken()); // 🔑 this kills the token
+            return response()->json(['message' => 'Successfully logged out']);
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+            return response()->json(['message' => 'Token is invalid or already expired'], 401);
+        }
     }
-}
 
     // Refresh token
     public function refresh()
