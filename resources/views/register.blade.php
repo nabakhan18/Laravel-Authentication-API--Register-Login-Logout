@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ asset('frontend/css/register.css') }}">
+</head>
+<body>
+    <section class="container">
+        <div class="login-container">
+            <div class="circle circle-one"></div>
+            <div class="form-container">
+                <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" 
+                     alt="illustration" class="illustration" />
+                <h1 class="opacity">REGISTER</h1>
+
+                <form id="registerForm">
+                    <input type="text" id="name" placeholder="FULL NAME" required />
+                    <input type="email" id="email" placeholder="EMAIL" required />
+                    <input type="password" id="password" placeholder="PASSWORD" required />
+                    <input type="password" id="password_confirmation" placeholder="CONFIRM PASSWORD" required />
+                    <button type="submit" class="opacity">REGISTER</button>
+                </form>
+
+                <div class="register-forget opacity">
+                    <a href="{{ url('/login') }}">Already have an account? Login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        try {
+            let response = await axios.post("{{ url('/api/register') }}", {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                password_confirmation: document.getElementById('password_confirmation').value
+            });
+
+            alert(response.data.message);
+            window.location.href = "{{ url('/login') }}";
+        } catch (error) {
+            alert("❌ " + (error.response?.data?.message || "Registration failed"));
+            console.error(error.response?.data);
+        }
+    });
+    </script>
+</body>
+</html>
