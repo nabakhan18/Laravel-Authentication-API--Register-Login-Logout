@@ -22,3 +22,4 @@ It includes all core authentication features such as:
 ---
 
 
+<img width="1897" height="912" alt="image" src="https://github.com/user-attachments/assets/331fdf62-ae0b-421d-9999-5670575fdffb" />
